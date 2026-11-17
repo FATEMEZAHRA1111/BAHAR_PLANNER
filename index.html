@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>برنامه‌ریز بهار</title>
 
-<!-- ====== تنظیمات اپلیکیشن (PWA) ====== -->
+<!-- تنظیمات PWA برای تبدیل به اپلیکیشن -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#d95776">
 <script>
@@ -15,10 +15,8 @@
     });
   }
 </script>
-<!-- ==================================== -->
 
 <style>
-    /* متغیرهای رنگ پیش‌فرض (تم روشن) */
     :root {
         --main-color: #d95776;
         --bg-color: #fdf2f4;
@@ -29,7 +27,6 @@
         --card-bg: #ffffff;
     }
 
-    /* متغیرهای رنگ برای حالت تاریک */
     body.dark-mode {
         --main-color: #f48fb1;
         --bg-color: #121212;
@@ -41,102 +38,45 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body { 
-        font-family: Tahoma, sans-serif; 
-        background-color: var(--bg-color); 
-        color: var(--text-color);
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        min-height: 100vh; 
-        padding: 20px; 
-        transition: background 0.3s, color 0.3s; 
-    }
-    
-    .app-container { 
-        width: 100%; 
-        max-width: 400px; 
-        background: var(--card-bg); 
-        border-radius: 30px; 
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
-        padding: 20px; 
-        padding-bottom: 80px; 
-        position: relative; 
-        min-height: 600px; 
-        transition: background 0.3s;
-    }
-    
+    body { font-family: Tahoma, sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: background 0.3s, color 0.3s; }
+    .app-container { width: 100%; max-width: 400px; background: var(--card-bg); border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); padding: 20px; padding-bottom: 80px; position: relative; min-height: 600px; transition: background 0.3s; }
     .header { display: flex; justify-content: space-between; align-items: center; background: var(--box-color); padding: 15px; border-radius: 20px; margin-bottom: 20px; transition: background 0.3s; }
     .header h1 { font-size: 18px; color: var(--main-color); margin-bottom: 5px; transition: color 0.3s; }
     .header .date { font-size: 12px; color: #888; font-weight: bold; }
-    
     .page-section { display: none; }
     .page-section.active { display: block; }
-    
     .tasks-section h3 { font-size: 16px; margin-bottom: 15px; }
-    
-    .task-item { 
-        display: flex; 
-        align-items: center; 
-        background: var(--card-bg); 
-        border: 1px solid var(--box-color); 
-        border-radius: 15px; 
-        padding: 10px 12px; 
-        margin-bottom: 10px; 
-        transition: all 0.3s ease;
-        animation: slideIn 0.3s ease;
-    }
-    
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .task-item.removing {
-        animation: slideOut 0.3s ease forwards;
-    }
-
-    @keyframes slideOut {
-        to { opacity: 0; transform: scale(0.9); }
-    }
-
+    .task-item { display: flex; align-items: center; background: var(--card-bg); border: 1px solid var(--box-color); border-radius: 15px; padding: 10px 12px; margin-bottom: 10px; transition: all 0.3s ease; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .task-item.removing { animation: slideOut 0.3s ease forwards; }
+    @keyframes slideOut { to { opacity: 0; transform: scale(0.9); } }
     .task-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--main-color); margin-left: 12px; cursor: pointer; }
     .task-item label { font-size: 14px; cursor: pointer; flex-grow: 1; }
     .task-item input:checked + label { text-decoration: line-through; color: #aaa; }
     .delete-btn { background: none; border: none; color: #ff5252; font-size: 18px; cursor: pointer; padding: 0 5px; }
-    
     .action-buttons { display: flex; gap: 15px; margin-top: 20px; }
     .action-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; border-radius: 20px; border: none; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: bold; background: var(--btn-color); color: var(--btn-text); transition: all 0.3s; }
     .action-btn:active { transform: scale(0.95); }
     .btn-fun { background: #dcedc8; color: #558b2f; }
-    
     .mood-section { margin-top: 20px; background: var(--box-color); border-radius: 20px; padding: 15px; text-align: center; transition: background 0.3s; }
-    .mood-section h3 { font-size: 14px; margin
-
--bottom: 15px; }
+    .mood-section h3 { font-size: 14px; margin-bottom: 15px; }
     .moods { display: flex; justify-content: space-around; }
     .mood { cursor: pointer; font-size: 30px; filter: grayscale(50%); transition: transform 0.2s; }
     .mood.active { transform: scale(1.3); filter: grayscale(0%); }
-    
     .page-content { text-align: center; padding: 10px; }
     .page-content h2 { color: var(--main-color); margin-bottom: 25px; transition: color 0.3s; }
-    
-    .chart-container { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
+    .chart-container { display: flex; justify-content: center; align-items: center; m
+
+argin-bottom: 20px; }
     .pie-chart { width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(var(--main-color) 0%, var(--main-color) var(--percentage), var(--box-color) var(--percentage), var(--box-color) 100%); display: flex; justify-content: center; align-items: center; position: relative; transition: background 0.3s; }
     .pie-chart::before { content: ""; position: absolute; width: 110px; height: 110px; background: var(--card-bg); border-radius: 50%; transition: background 0.3s; }
     .pie-text { position: relative; font-size: 24px; font-weight: bold; color: var(--main-color); transition: color 0.3s; }
-
     .settings-group { background: var(--box-color); padding: 20px; border-radius: 15px; margin-bottom: 15px; text-align: center; transition: background 0.3s; }
     .settings-group h4 { font-size: 15px; margin-bottom: 15px; }
-    
     .theme-colors { display: flex; gap: 15px; justify-content: center; }
     .color-circle { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s; }
     .color-circle:hover { transform: scale(1.1); }
-    
     .settings-btn { background: var(--btn-color); color: var(--btn-text); border: none; padding: 15px; border-radius: 15px; font-family: inherit; font-size: 14px; cursor: pointer; width: 100%; font-weight: bold; transition: all 0.3s; margin-bottom: 10px; }
-    
-    /* کلید حالت تاریک */
     .toggle-container { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
     .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
@@ -144,7 +84,6 @@
     .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
     input:checked + .slider { background-color: var(--main-color); }
     input:checked + .slider:before { transform: translateX(26px); }
-
     .bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--box-color); border-radius: 0 0 30px 30px; display: flex; justify-content: space-around; padding: 15px 0; transition: background 0.3s; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 12px; color: #aaa; cursor: pointer; }
     .nav-item.active { color: var(--main-color); font-weight: bold; transition: color 0.3s; }
@@ -173,9 +112,7 @@
         <div class="mood-section">
             <h3>حال و هوای امروزت چطوره؟</h3>
             <div class="moods">
-                <div class="mood" id="mood-1" onclick="setMood(1, this)">😄</di
-
-v>
+                <div class="mood" id="mood-1" onclick="setMood(1, this)">😄</div>
                 <div class="mood" id="mood-2" onclick="setMood(2, this)">😐</div>
                 <div class="mood" id="mood-3" onclick="setMood(3, this)">😔</div>
             </div>
@@ -188,7 +125,8 @@ v>
             <div class="chart-container">
                 <div class="pie-chart" id="progress-chart" style="--percentage: 0%;">
                     <span class="pie-text" id="progress-text">0%</span>
-                </div>
+
+</div>
             </div>
             <p id="report-text" style="font-size: 15px;">در حال محاسبه...</p>
         </div>
@@ -197,7 +135,6 @@ v>
     <div id="page-settings" class="page-section">
         <div class="page-content">
             <h2>⚙️ تنظیمات</h2>
-            
             <div class="settings-group">
                 <div class="toggle-container">
                     <span>🌙 حالت شب (تاریک)</span>
@@ -207,7 +144,6 @@ v>
                     </label>
                 </div>
             </div>
-
             <div class="settings-group">
                 <h4>🎨 انتخاب رنگ تم</h4>
                 <div class="theme-colors">
@@ -216,7 +152,6 @@ v>
                     <div class="color-circle" style="background: #bcaaa4;" onclick="changeTheme('cream')"></div>
                 </div>
             </div>
-            
             <button class="settings-btn" onclick="resetApp()">🗑️ پاک کردن همه‌ی اطلاعات</button>
         </div>
     </div>
@@ -229,7 +164,6 @@ v>
 </div>
 
 <script>
-    // ---------- ۱. صدا ----------
     function playSound() {
         try {
             var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -246,14 +180,12 @@ v>
         } catch(e) { console.log("صدا پخش نشد."); }
     }
 
-    // ---------- ۲. تاریخ ----------
     function updateDate() {
         var today = new Date();
         var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('current-date').innerText = today.toLocaleDateString('fa-IR', options);
     }
 
-    // ---------- ۳. تکالیف ----------
     var tasks = [];
     try {
         var savedTasks = localStorage.getItem('myTasks');
@@ -269,9 +201,7 @@ v>
             div.className = 'task-item';
             div.id = 'task-div-' + task.id;
             var checkedStr = task.done ? 'checked' : '';
-            div.innerHTML = '<input type="checkbox" id="task-' + task.id + '" ' + checkedStr + ' onchange="toggleTask(' + task
-
-.id + ')">' +
+            div.innerHTML = '<input type="checkbox" id="task-' + task.id + '" ' + checkedStr + ' onchange="toggleTask(' + task.id + ')">' +
                             '<label for="task-' + task.id + '">' + task.text + '</label>' +
                             '<button class="delete-btn" onclick="deleteTask(' + task.id + ')">❌</button>';
             listContainer.appendChild(div);
@@ -289,7 +219,9 @@ v>
         }
     }
 
-    function toggleTask(id) {
+    function toggl
+
+eTask(id) {
         for (var i = 0; i < tasks.length; i++) {
             if (tasks[i].id === id) { 
                 tasks[i].done = !tasks[i].done; 
@@ -304,7 +236,6 @@ v>
         if (confirm("مطمئنی می‌خوای پاکش کنی؟")) {
             var div = document.getElementById('task-div-' + id);
             if (div) div.classList.add('removing');
-            
             setTimeout(function() {
                 var newTasks = [];
                 for (var i = 0; i < tasks.length; i++) {
@@ -316,7 +247,6 @@ v>
         }
     }
 
-    // ---------- ۴. نمودار ----------
     function updateChart() {
         var total = tasks.length;
         var done = 0;
@@ -324,13 +254,11 @@ v>
             if (tasks[i].done) done++;
         }
         var percent = total === 0 ? 0 : Math.round((done / total) * 100);
-        
         document.getElementById('progress-text').innerText = percent + '%';
         document.getElementById('progress-chart').style.setProperty('--percentage', percent + '%');
         document.getElementById('report-text').innerText = total === 0 ? 'هنوز تکلیفی نداری!' : 'از ' + total + ' تکلیف، ' + done + ' تا انجام شده.';
     }
 
-    // ---------- ۵. فعالیت غیردرسی ----------
     var activities = ["برو یه چایی یا شربت خنک بخور! 🍹", "۱۵ دقیقه برو بیرون قدم بزن. 🚶‍♂️", "یه آهنگ موردعلاقه‌ت رو گوش بده. 🎧", "به یه دوست قدیمی پیام بده. 💬", "یه نقاشی بکش یا نقاشی ببین. 🎨"];
     var usedActivities = [];
     try {
@@ -353,7 +281,6 @@ v>
         alert("پیشنهاد امروز برای تفریح:\n\n" + chosen);
     }
 
-    // ---------- ۶. حال و هوا ----------
     function setMood(moodId, element) {
         var allMoods = document.getElementsByClassName('mood');
         for (var i = 0; i < allMoods.length; i++) allMoods[i].classList.remove('active');
@@ -370,22 +297,16 @@ v>
         }
     }
 
-    // ---------- ۷. ناوبری ----------
     function switchPage(pageName, navElement) {
         var pages = document.getElementsByClassName('page-section');
         for (var i = 0; i < pages.length; i++) pages[i].classList.remove('active');
-        document.getElementById('page
-
--' + pageName).classList.add('active');
-
+        document.getElementById('page-' + pageName).classList.add('active');
         var navs = document.getElementsByClassName('nav-item');
         for (var i = 0; i < navs.length; i++) navs[i].classList.remove('active');
         navElement.classList.add('active');
-        
         if (pageName === 'reports') updateChart();
     }
 
-    // ---------- ۸. تم رنگی و حالت تاریک ----------
     function changeTheme(theme) {
         var root = document.documentElement;
         if (theme === 'pink') {
@@ -396,7 +317,9 @@ v>
             root.style.setProperty('--btn-text', '#c2185b');
         } else if (theme === 'green') {
             root.style.setProperty('--main-color', '#558b2f');
-            root.style.setProperty('--bg-color', '#f1f8e9');
+            root.style.setProperty('--bg-color', '#f1f
+
+8e9');
             root.style.setProperty('--box-color', '#e8f5e9');
             root.style.setProperty('--btn-color', '#c8e6c9');
             root.style.setProperty('--btn-text', '#2e7d32');
@@ -434,7 +357,6 @@ v>
         }
     }
 
-    // ---------- ۹. پاک کردن ----------
     function resetApp() {
         if (confirm("مطمئنی؟ همه چی پاک میشه!")) {
             localStorage.clear();
@@ -442,7 +364,6 @@ v>
         }
     }
 
-    // ---------- اجرای اولیه ----------
     updateDate();
     renderTasks();
     loadMood();
