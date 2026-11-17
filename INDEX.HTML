@@ -1,0 +1,453 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>برنامه‌ریز بهار</title>
+
+<!-- ====== تنظیمات اپلیکیشن (PWA) ====== -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d95776">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js');
+    });
+  }
+</script>
+<!-- ==================================== -->
+
+<style>
+    /* متغیرهای رنگ پیش‌فرض (تم روشن) */
+    :root {
+        --main-color: #d95776;
+        --bg-color: #fdf2f4;
+        --box-color: #fff0f3;
+        --btn-color: #f8bbd0;
+        --btn-text: #c2185b;
+        --text-color: #444;
+        --card-bg: #ffffff;
+    }
+
+    /* متغیرهای رنگ برای حالت تاریک */
+    body.dark-mode {
+        --main-color: #f48fb1;
+        --bg-color: #121212;
+        --box-color: #1e1e1e;
+        --btn-color: #333333;
+        --btn-text: #f48fb1;
+        --text-color: #e0e0e0;
+        --card-bg: #2d2d2d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body { 
+        font-family: Tahoma, sans-serif; 
+        background-color: var(--bg-color); 
+        color: var(--text-color);
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        min-height: 100vh; 
+        padding: 20px; 
+        transition: background 0.3s, color 0.3s; 
+    }
+    
+    .app-container { 
+        width: 100%; 
+        max-width: 400px; 
+        background: var(--card-bg); 
+        border-radius: 30px; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
+        padding: 20px; 
+        padding-bottom: 80px; 
+        position: relative; 
+        min-height: 600px; 
+        transition: background 0.3s;
+    }
+    
+    .header { display: flex; justify-content: space-between; align-items: center; background: var(--box-color); padding: 15px; border-radius: 20px; margin-bottom: 20px; transition: background 0.3s; }
+    .header h1 { font-size: 18px; color: var(--main-color); margin-bottom: 5px; transition: color 0.3s; }
+    .header .date { font-size: 12px; color: #888; font-weight: bold; }
+    
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+    
+    .tasks-section h3 { font-size: 16px; margin-bottom: 15px; }
+    
+    .task-item { 
+        display: flex; 
+        align-items: center; 
+        background: var(--card-bg); 
+        border: 1px solid var(--box-color); 
+        border-radius: 15px; 
+        padding: 10px 12px; 
+        margin-bottom: 10px; 
+        transition: all 0.3s ease;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .task-item.removing {
+        animation: slideOut 0.3s ease forwards;
+    }
+
+    @keyframes slideOut {
+        to { opacity: 0; transform: scale(0.9); }
+    }
+
+    .task-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--main-color); margin-left: 12px; cursor: pointer; }
+    .task-item label { font-size: 14px; cursor: pointer; flex-grow: 1; }
+    .task-item input:checked + label { text-decoration: line-through; color: #aaa; }
+    .delete-btn { background: none; border: none; color: #ff5252; font-size: 18px; cursor: pointer; padding: 0 5px; }
+    
+    .action-buttons { display: flex; gap: 15px; margin-top: 20px; }
+    .action-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; border-radius: 20px; border: none; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: bold; background: var(--btn-color); color: var(--btn-text); transition: all 0.3s; }
+    .action-btn:active { transform: scale(0.95); }
+    .btn-fun { background: #dcedc8; color: #558b2f; }
+    
+    .mood-section { margin-top: 20px; background: var(--box-color); border-radius: 20px; padding: 15px; text-align: center; transition: background 0.3s; }
+    .mood-section h3 { font-size: 14px; margin
+
+-bottom: 15px; }
+    .moods { display: flex; justify-content: space-around; }
+    .mood { cursor: pointer; font-size: 30px; filter: grayscale(50%); transition: transform 0.2s; }
+    .mood.active { transform: scale(1.3); filter: grayscale(0%); }
+    
+    .page-content { text-align: center; padding: 10px; }
+    .page-content h2 { color: var(--main-color); margin-bottom: 25px; transition: color 0.3s; }
+    
+    .chart-container { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
+    .pie-chart { width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(var(--main-color) 0%, var(--main-color) var(--percentage), var(--box-color) var(--percentage), var(--box-color) 100%); display: flex; justify-content: center; align-items: center; position: relative; transition: background 0.3s; }
+    .pie-chart::before { content: ""; position: absolute; width: 110px; height: 110px; background: var(--card-bg); border-radius: 50%; transition: background 0.3s; }
+    .pie-text { position: relative; font-size: 24px; font-weight: bold; color: var(--main-color); transition: color 0.3s; }
+
+    .settings-group { background: var(--box-color); padding: 20px; border-radius: 15px; margin-bottom: 15px; text-align: center; transition: background 0.3s; }
+    .settings-group h4 { font-size: 15px; margin-bottom: 15px; }
+    
+    .theme-colors { display: flex; gap: 15px; justify-content: center; }
+    .color-circle { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s; }
+    .color-circle:hover { transform: scale(1.1); }
+    
+    .settings-btn { background: var(--btn-color); color: var(--btn-text); border: none; padding: 15px; border-radius: 15px; font-family: inherit; font-size: 14px; cursor: pointer; width: 100%; font-weight: bold; transition: all 0.3s; margin-bottom: 10px; }
+    
+    /* کلید حالت تاریک */
+    .toggle-container { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+    .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--main-color); }
+    input:checked + .slider:before { transform: translateX(26px); }
+
+    .bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--box-color); border-radius: 0 0 30px 30px; display: flex; justify-content: space-around; padding: 15px 0; transition: background 0.3s; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 12px; color: #aaa; cursor: pointer; }
+    .nav-item.active { color: var(--main-color); font-weight: bold; transition: color 0.3s; }
+    .nav-icon { font-size: 20px; margin-bottom: 5px; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div>
+            <h1>🌸 برنامه‌ریز بهار</h1>
+            <div class="date" id="current-date">...</div>
+        </div>
+    </div>
+
+    <div id="page-home" class="page-section active">
+        <div class="tasks-section">
+            <h3>تکالیف امروز</h3>
+            <div id="task-list"></div>
+        </div>
+        <div class="action-buttons">
+            <button class="action-btn" onclick="addTask()"><span style="font-size: 24px;">+</span> افزودن تکلیف</button>
+            <button class="action-btn btn-fun" onclick="funActivity()"><span style="font-size: 24px;">🎒</span> فعالیت غیردرسی</button>
+        </div>
+        <div class="mood-section">
+            <h3>حال و هوای امروزت چطوره؟</h3>
+            <div class="moods">
+                <div class="mood" id="mood-1" onclick="setMood(1, this)">😄</di
+
+v>
+                <div class="mood" id="mood-2" onclick="setMood(2, this)">😐</div>
+                <div class="mood" id="mood-3" onclick="setMood(3, this)">😔</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-reports" class="page-section">
+        <div class="page-content">
+            <h2>📊 گزارش پیشرفت</h2>
+            <div class="chart-container">
+                <div class="pie-chart" id="progress-chart" style="--percentage: 0%;">
+                    <span class="pie-text" id="progress-text">0%</span>
+                </div>
+            </div>
+            <p id="report-text" style="font-size: 15px;">در حال محاسبه...</p>
+        </div>
+    </div>
+
+    <div id="page-settings" class="page-section">
+        <div class="page-content">
+            <h2>⚙️ تنظیمات</h2>
+            
+            <div class="settings-group">
+                <div class="toggle-container">
+                    <span>🌙 حالت شب (تاریک)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h4>🎨 انتخاب رنگ تم</h4>
+                <div class="theme-colors">
+                    <div class="color-circle" style="background: #f06292;" onclick="changeTheme('pink')"></div>
+                    <div class="color-circle" style="background: #81c784;" onclick="changeTheme('green')"></div>
+                    <div class="color-circle" style="background: #bcaaa4;" onclick="changeTheme('cream')"></div>
+                </div>
+            </div>
+            
+            <button class="settings-btn" onclick="resetApp()">🗑️ پاک کردن همه‌ی اطلاعات</button>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchPage('home', this)"><div class="nav-icon">🏠</div>خانه</div>
+        <div class="nav-item" onclick="switchPage('reports', this)"><div class="nav-icon">📊</div>گزارش‌ها</div>
+        <div class="nav-item" onclick="switchPage('settings', this)"><div class="nav-icon">⚙️</div>تنظیمات</div>
+    </div>
+</div>
+
+<script>
+    // ---------- ۱. صدا ----------
+    function playSound() {
+        try {
+            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            var oscillator = audioCtx.createOscillator();
+            var gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); 
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        } catch(e) { console.log("صدا پخش نشد."); }
+    }
+
+    // ---------- ۲. تاریخ ----------
+    function updateDate() {
+        var today = new Date();
+        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').innerText = today.toLocaleDateString('fa-IR', options);
+    }
+
+    // ---------- ۳. تکالیف ----------
+    var tasks = [];
+    try {
+        var savedTasks = localStorage.getItem('myTasks');
+        if (savedTasks) tasks = JSON.parse(savedTasks);
+    } catch(e) { tasks = []; }
+
+    function renderTasks() {
+        var listContainer = document.getElementById('task-list');
+        listContainer.innerHTML = ''; 
+        for (var i = 0; i < tasks.length; i++) {
+            var task = tasks[i];
+            var div = document.createElement('div');
+            div.className = 'task-item';
+            div.id = 'task-div-' + task.id;
+            var checkedStr = task.done ? 'checked' : '';
+            div.innerHTML = '<input type="checkbox" id="task-' + task.id + '" ' + checkedStr + ' onchange="toggleTask(' + task
+
+.id + ')">' +
+                            '<label for="task-' + task.id + '">' + task.text + '</label>' +
+                            '<button class="delete-btn" onclick="deleteTask(' + task.id + ')">❌</button>';
+            listContainer.appendChild(div);
+        }
+        localStorage.setItem('myTasks', JSON.stringify(tasks));
+        updateChart(); 
+    }
+
+    function addTask() {
+        var taskText = prompt("اسم تکلیف جدید چیه؟");
+        if (taskText && taskText.trim() !== "") {
+            tasks.push({ id: Math.floor(Math.random() * 100000), text: taskText, done: false });
+            renderTasks(); 
+            playSound();
+        }
+    }
+
+    function toggleTask(id) {
+        for (var i = 0; i < tasks.length; i++) {
+            if (tasks[i].id === id) { 
+                tasks[i].done = !tasks[i].done; 
+                if(tasks[i].done) playSound(); 
+                break; 
+            }
+        }
+        renderTasks();
+    }
+
+    function deleteTask(id) {
+        if (confirm("مطمئنی می‌خوای پاکش کنی؟")) {
+            var div = document.getElementById('task-div-' + id);
+            if (div) div.classList.add('removing');
+            
+            setTimeout(function() {
+                var newTasks = [];
+                for (var i = 0; i < tasks.length; i++) {
+                    if (tasks[i].id !== id) newTasks.push(tasks[i]);
+                }
+                tasks = newTasks;
+                renderTasks();
+            }, 300);
+        }
+    }
+
+    // ---------- ۴. نمودار ----------
+    function updateChart() {
+        var total = tasks.length;
+        var done = 0;
+        for (var i = 0; i < total; i++) {
+            if (tasks[i].done) done++;
+        }
+        var percent = total === 0 ? 0 : Math.round((done / total) * 100);
+        
+        document.getElementById('progress-text').innerText = percent + '%';
+        document.getElementById('progress-chart').style.setProperty('--percentage', percent + '%');
+        document.getElementById('report-text').innerText = total === 0 ? 'هنوز تکلیفی نداری!' : 'از ' + total + ' تکلیف، ' + done + ' تا انجام شده.';
+    }
+
+    // ---------- ۵. فعالیت غیردرسی ----------
+    var activities = ["برو یه چایی یا شربت خنک بخور! 🍹", "۱۵ دقیقه برو بیرون قدم بزن. 🚶‍♂️", "یه آهنگ موردعلاقه‌ت رو گوش بده. 🎧", "به یه دوست قدیمی پیام بده. 💬", "یه نقاشی بکش یا نقاشی ببین. 🎨"];
+    var usedActivities = [];
+    try {
+        var savedActs = localStorage.getItem('usedActivities');
+        if (savedActs) usedActivities = JSON.parse(savedActs);
+    } catch(e) {}
+
+    function funActivity() {
+        if (usedActivities.length >= activities.length) {
+            usedActivities = [];
+            alert("همه‌ی فعالیت‌ها رو انجام دادی! بریم برای دور جدید؟ 😎");
+        }
+        var available = [];
+        for (var i = 0; i < activities.length; i++) {
+            if (usedActivities.indexOf(activities[i]) === -1) available.push(activities[i]);
+        }
+        var chosen = available[Math.floor(Math.random() * available.length)];
+        usedActivities.push(chosen);
+        localStorage.setItem('usedActivities', JSON.stringify(usedActivities));
+        alert("پیشنهاد امروز برای تفریح:\n\n" + chosen);
+    }
+
+    // ---------- ۶. حال و هوا ----------
+    function setMood(moodId, element) {
+        var allMoods = document.getElementsByClassName('mood');
+        for (var i = 0; i < allMoods.length; i++) allMoods[i].classList.remove('active');
+        element.classList.add('active');
+        localStorage.setItem('savedMood', moodId);
+        playSound();
+    }
+
+    function loadMood() {
+        var savedMood = localStorage.getItem('savedMood');
+        if (savedMood) {
+            var moodElement = document.getElementById('mood-' + savedMood);
+            if (moodElement) moodElement.classList.add('active');
+        }
+    }
+
+    // ---------- ۷. ناوبری ----------
+    function switchPage(pageName, navElement) {
+        var pages = document.getElementsByClassName('page-section');
+        for (var i = 0; i < pages.length; i++) pages[i].classList.remove('active');
+        document.getElementById('page
+
+-' + pageName).classList.add('active');
+
+        var navs = document.getElementsByClassName('nav-item');
+        for (var i = 0; i < navs.length; i++) navs[i].classList.remove('active');
+        navElement.classList.add('active');
+        
+        if (pageName === 'reports') updateChart();
+    }
+
+    // ---------- ۸. تم رنگی و حالت تاریک ----------
+    function changeTheme(theme) {
+        var root = document.documentElement;
+        if (theme === 'pink') {
+            root.style.setProperty('--main-color', '#d95776');
+            root.style.setProperty('--bg-color', '#fdf2f4');
+            root.style.setProperty('--box-color', '#fff0f3');
+            root.style.setProperty('--btn-color', '#f8bbd0');
+            root.style.setProperty('--btn-text', '#c2185b');
+        } else if (theme === 'green') {
+            root.style.setProperty('--main-color', '#558b2f');
+            root.style.setProperty('--bg-color', '#f1f8e9');
+            root.style.setProperty('--box-color', '#e8f5e9');
+            root.style.setProperty('--btn-color', '#c8e6c9');
+            root.style.setProperty('--btn-text', '#2e7d32');
+        } else if (theme === 'cream') {
+            root.style.setProperty('--main-color', '#8d6e63');
+            root.style.setProperty('--bg-color', '#fff8e1');
+            root.style.setProperty('--box-color', '#ffecb3');
+            root.style.setProperty('--btn-color', '#ffe082');
+            root.style.setProperty('--btn-text', '#5d4037');
+        }
+        localStorage.setItem('savedTheme', theme);
+    }
+
+    function loadTheme() {
+        var savedTheme = localStorage.getItem('savedTheme');
+        if (savedTheme) changeTheme(savedTheme);
+    }
+
+    function toggleDarkMode() {
+        var isDark = document.getElementById('dark-mode-toggle').checked;
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            localStorage.setItem('darkMode', 'true');
+        } else {
+            document.body.classList.remove('dark-mode');
+            localStorage.setItem('darkMode', 'false');
+        }
+    }
+
+    function loadDarkMode() {
+        var isDark = localStorage.getItem('darkMode');
+        if (isDark === 'true') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('dark-mode-toggle').checked = true;
+        }
+    }
+
+    // ---------- ۹. پاک کردن ----------
+    function resetApp() {
+        if (confirm("مطمئنی؟ همه چی پاک میشه!")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
+    // ---------- اجرای اولیه ----------
+    updateDate();
+    renderTasks();
+    loadMood();
+    loadTheme();
+    loadDarkMode();
+</script>
+</body>
+</html>
